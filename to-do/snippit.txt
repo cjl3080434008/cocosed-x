@@ -1,0 +1,39 @@
+1.audio   sound
+SimpleAudioEngine in namesapce CocosDenshion.   
+Fmod----跨平台音频库
+
+SimpleAudioEngine use FmodAudioPlayer with it's operator（组合）. and they have an
+parent pure virtual class AudioPlayer.(作为接口)， FomdAudioPlayer use
+Fmod库。
+
+用于控制各种music, 是否循环播放， 已经音效， 音量等。
+注意的是在程序退出之前需要调用 static end();函数释放资源
+end()释放了由FmodAudioPlayer分配的voice 操作控制对象。
+
+
+2.file operator
+FileUtils ---- > 内部做了一层cache  <file_name, file_content>,
+		  如果没找到cache就open     （什么时候clear cache 释放资源）
+
+3.
+
+
+
+
+
+
+
+
+======================================
+======================================
+======================================
+======================================
+基本类型：
+			object ---->用成员函数指针来完成方法传递与调用。
+			   |
+			  Node  ----->node用vector保存child并有一个parent指针。
+
+CCSet:		是对std::set的封装，底层容器std::set<object *>
+
+
+
