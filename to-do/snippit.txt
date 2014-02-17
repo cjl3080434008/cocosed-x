@@ -1,3 +1,16 @@
+cocos2d-x框架流程：		http://m.oschina.net/blog/72202
+框架类（AppDelegate（CCApplication）（应用程序主流程）->CCEGLView（创建窗口）->CCDisplayLinkDirector(CCDirector)（主循环）->CCScene（场景）->推动力：事件（时间事件、帧事件、渲染事件）、CCScheduler、CCTimer、CCLayer、CCNode）
+
+1.CCApplication与AppDelegate（单例）
+CCApplication是AppDelegate的一个抽象基类。主要初始化OpenGL示例初始化，设置资源路径等。
+-virtual bool applicationDidFinishLaunching() = 0;//在AppDelegate中实现，初始化CCDirector 和CCScene
+-virtual void applicationDidEnterBackground() = 0;//在AppDelegate中实现，游戏退至后台时调用
+-virtual void applicationWillEnterForeground() = 0;//在AppDelegate中实现，游戏恢复前台时调用
+
+
+1.CCEGLView
+窗口类，主要用来创建窗口，接收窗口事件，调节窗口大小等。
+
 1.audio   sound
 SimpleAudioEngine in namesapce CocosDenshion.   
 Fmod----跨平台音频库
@@ -14,8 +27,45 @@ end()释放了由FmodAudioPlayer分配的voice 操作控制对象。
 2.file operator
 FileUtils ---- > 内部做了一层cache  <file_name, file_content>,
 		  如果没找到cache就open     （什么时候clear cache 释放资源）
+   fullPathForFilename(std::string filename); ----> get the path
 
-3.
+3.CCTextureCache
+与FileUtils一样在内部也做了一层cache <full_path, Texture2D *> 
+其真正的实例位于游戏的director类中。 每次的static
+调用都是获取director实例中的CCTextureCache对象。
+
+CCTexture2D *xxx_Texture =
+CCTextureCache::sharedTextureCache()->addImage("xxx.png");
+
+CCSpriteFrame *frame1, frame2, frame3;
+frame1 = CCSpriteFrame::frameWithTexture(xxx_Texture,
+		cocos2d::CCRectMake());通过帧组合成动画，并在Sprite中应用这个动画就能实现人物的行走特效。
+CCSprite *hero = CCSprite::spriteWithSpriteFrame(frame1);
+hero->setPosition(ccp(100,100));
+addChild(hero);
+
+4.CCTimer:
+update定时器 & interval定时器
+update定时器每个节点只能注册一个，带优先级
+interval定时器每个节点可以注册很多个，根据回调函数不同来执行一个节点的不同函数。
+
+
+5.CCScheduler :  http://www.cnblogs.com/songcf/p/3162414.html
+那么要为一个不加入场景的节点（如：全局网络派发器）添加调度器，就需要自己调用它的以下两个函数：
+onEnter();
+onEnterTransitionDidFinish();
+这样，该节点的调度器就不会被暂停了。
+
+
+6.CCDirector VS CCDisplayLinkDirector
+有四种Director:
+    - kCCDirectorTypeNSTimer (default) 
+    - kCCDirectorTypeMainLoop 
+    - kCCDirectorTypeThreadMainLoop 
+    - kCCDirectorTypeDisplayLink			（暂时只有这个director）
+
+前者是抽象类，后者是具体类，在cocos2d-x中用的就是这个具体类（单例）。
+
 
 
 
@@ -33,7 +83,9 @@ FileUtils ---- > 内部做了一层cache  <file_name, file_content>,
 			   |
 			  Node  ----->node用vector保存child并有一个parent指针。
 
-CCSet:		是对std::set的封装，底层容器std::set<object *>
+CCSet/CCSetIterator:		是对std::set的封装，底层容器std::set<object *>
+
+
 
 
 
