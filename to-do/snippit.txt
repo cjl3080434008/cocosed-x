@@ -68,9 +68,19 @@ onEnterTransitionDidFinish();
 
 
 
+7.CCAnimation  &  CCAnimationCache(管理CCAnimation)
+	CCAnimate是一个CCActionInterval的子类属于动作，可以通过动画框架初始化
+	cocos2d::CCAnimate::actionWithAnimation(anim);
 
-
-
+8.菜单的相应类
+				CCMenu
+				   |
+			  CCMenuItem
+			       |
+	----------------------------------
+	|
+CCMenuItemLabel   CCMenuItemImage   CCMenuItemFont	CCMenuItemToggle
+CCMenuItemSprite
 
 
 
@@ -85,6 +95,89 @@ onEnterTransitionDidFinish();
 
 CCSet/CCSetIterator:		是对std::set的封装，底层容器std::set<object *>
 
+
+
+
+
+
+
+======================================
+======================================
+======================================
+======================================
+项目文件划分：
+------- util
+------- scene(是图层控制的基础，直接由director调用，负责场景切换。)
+------- layer	(精灵层<所有可动物体的基类> 、 控制层、
+		特效层<咱都特效，扣血弹tip等>、 )
+------- model
+------- map(地图往往是读取tmx文件获得的， 像ARPG游戏可能有多种类型的地图) 
+------- AI
+
+
+
+
+
+
+
+
+
+
+
+
+======================================
+======================================
+======================================
+======================================
+代码片段：
+*给map中的各个图层添加抗锯齿效果
+void GameMap::enableAnitiAliasForEachLayer()
+{
+	CCArray * pChildrenArray = this->getChildren();
+	CCSpriteBatchNode* child = NULL;
+	CCObject* pObject = NULL;
+	//遍历Tilemap的所有图层
+	CCARRAY_FOREACH(pChildrenArray, pObject)
+	{
+		child = (CCSpriteBatchNode*)pObject;
+		if(!child)
+			break;
+		//给图层的纹理开启抗锯齿
+		child->getTexture()->setAntiAliasTexParameters();
+	}
+}
+
+
+*图层中的元素属性获取
+//遍历所有对象
+for( it = objects->begin(); it != objects->end(); it++) 
+{
+	dict = (*it);
+	if(!dict)
+		break;
+	std::string key = "x";
+	//获取x坐标
+	int x = dict->objectForKey(key)->toInt();
+	key = "y";
+	//获取y坐标
+	int y = dict->objectForKey(key)->toInt();
+	CCPoint tileCoord = tileCoordForPosition(ccp(x, y));
+	//计算唯一ID
+	int index = tileCoord.x + tileCoord.y * this->getMapSize().width;
+	key = "type";
+	//获取对象类别
+	CCString *type = dict->objectForKey(key);
+	//如果类型是传送门
+	if (type->m_sString == "teleport"){
+		Teleport *teleport = new Teleport(dict, x, y);
+		teleportDict->setObject(teleport, index);
+	}
+	//如果类型是NPC对象
+	else if (type->m_sString == "npc"){
+		NPC *npc = new NPC(dict, x, y);
+		npcDict->setObject(npc, index);
+	}
+}
 
 
 
