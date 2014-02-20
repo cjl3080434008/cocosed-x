@@ -77,8 +77,8 @@ onEnterTransitionDidFinish();
 				   |
 			  CCMenuItem
 			       |
-	----------------------------------
-	|
+	-------------------------------------------------------------
+	|					|					|					|
 CCMenuItemLabel   CCMenuItemImage   CCMenuItemFont	CCMenuItemToggle
 CCMenuItemSprite
 
@@ -111,7 +111,8 @@ CCSet/CCSetIterator:		是对std::set的封装，底层容器std::set<object *>
 ------- layer	(精灵层<所有可动物体的基类> 、 控制层、
 		特效层<咱都特效，扣血弹tip等>、 )
 ------- model
-------- map(地图往往是读取tmx文件获得的， 像ARPG游戏可能有多种类型的地图) 
+------- map(地图往往是读取tmx文件获得的， 像ARPG游戏可能有多种类型的地图)
+	每一个map最后都被layer这个容器所容纳。 
 ------- AI
 
 
