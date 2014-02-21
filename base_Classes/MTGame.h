@@ -1,6 +1,7 @@
 #ifndef __MTGAME_H__
 #define __MTGAME_H__
 
+// 不在显示代码中用这个头文件，编译依赖过严重
 #include "cocos2d.h"
 #include "GameConstants.h"
 
