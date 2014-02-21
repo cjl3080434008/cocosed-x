@@ -1,20 +1,55 @@
 // ******  2014/02/14   begin
-1. 加载scene
+1. 加载scene(done)
+5. 创景内的移动(CCSequence::actionWithDuration(time, nextPosition);
+		sprite.runAction(action); 这样就能产生移动)
+7. 多点触控（done）
+9. 坐标转换(done)
+10. 声音控制(done)
+11. 回调控制
+12. 精灵贴图
+13. 动画
+5.1 场景地图的相对移动
+6. 场景间交换数据
 2. 菜单的操作
 3. 加载活动物体（包括玩家）
 4. 场景间的切换
-5. 创景内的移动
-5.1 场景地图的相对移动
-6. 场景间交换数据
-7. 多点触控
-9. 坐标转换
-10. 声音控制
-11. 回调控制
-12. 精灵贴图
-13. 坐标转换
-14. 动画
 
 
 // *********
-1.图层中的元素被点击如果判定
+1.图层中的元素被点击如果判定(根据图层从上至下一个图层一个图层查找，最先找到的那个对象就是被点击的对象)
+
+2.碰撞检测 (简单的可以检测当前距离或者下一个位置的距离是否在碰撞范围内。)
+	// 球体对上的碰撞检测
+	if (ballNextPosition.x < _ball->radius()) {
+		ballNextPosition.x = _ball->radius();
+		ballVector.x *= -0.8f; // -0.8倍数
+		SimpleAudioEngine::sharedEngine()->playEffect("hit.wav");
+	}
+	// 球体对下边框的碰撞检测
+if (ballNextPosition.x > _screenSize.width - _ball->radius()) {
+	ballNextPosition.x = _screenSize.width - _ball->radius();
+	ballVector.x *= -0.8f;
+	SimpleAudioEngine::sharedEngine()->playEffect("hit.wav");
+}
+	碰撞检测以后的力向量  ----> 
+	float mag_ball = pow(ballVector.x, 2) + pow(ballVector.y,2);
+	float mag_player = pow(playerVector.x, 2) + pow(playerVector.y, 2);
+	float force = sqrt(mag_ball + mag_player);
+
+
+3.坐标系的问题 ------> 以竖屏为基准Y轴为height， x轴为width.
+
+7.多点触控： 
+（1）touchBegin的时候便利所有的touch点，然后遍历所有的精灵 check
+if(sprite->boundingBox().containsPoint(tap))
+	sprite->setTouch(touch);
+（2）touchMove的时候继续便利所有的touch点找到之前记录的那个touch点，
+tap = touch->getLocation();
+CCPoint nextPosition = tap;
+//控制精灵的位置让其不会出了屏幕
+sprite.setNextPosition(nextPosition);
+sprite.setVector(ccp(tap.x-sprite.getPositionX(), tap.y-sprite.getPositionY)); // 设置精灵的力向量
+（3）touchEnd的时候找到对应的sprite,clear它的触摸状态和位置。
+
+
 

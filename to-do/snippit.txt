@@ -83,6 +83,12 @@ CCMenuItemLabel   CCMenuItemImage   CCMenuItemFont	CCMenuItemToggle
 CCMenuItemSprite
 
 
+9.CCSpriteBatchNode是对sprite_sheet已经plist（资源定位配置文件）的一种操作类。
+CCSpriteFrameCache::sharedSpriteFrameCache()->addSpriteFramesWithFile("sprite_sheet.plist");
+_gameBatchNode = CCSpriteBatchNode::create("sprite_sheet.png");
+this->addChild(_gameBatchNode);
+sprite = CCSprite::createWithSpriteFrameName("trees.png"); //	这里的.png都在plist里面定义好了。
+
 
 ======================================
 ======================================
@@ -95,6 +101,14 @@ CCMenuItemSprite
 
 CCSet/CCSetIterator:		是对std::set的封装，底层容器std::set<object *>
 
+
+<CCObject的内存管理>，其中有一个m_uAutoReleaseCount,是用于对象在多个autoreleasePool中被持有而用的。
+之所以需要经常的retain()一个对象，是因为一个对象在被创建的时候是在这一帧的autoReleasePool中被管理，但是当到下一帧的时候这个pool就会release其管理的所有对象，所以如果我们需要一个对象一直有用最好retain()它不然它就在下一帧被free。(但这时候我们就需要手动的来release()这个对象了再需要释放的时候)。
+其中layer、scene都是天生的autorelease object.
+注意：渲染树结构与链式反应(两个其实是一个原理不同的说发而已)!!!!!!   一般而言，内部组成树形结构的链式反应，如 CCNode）。链式反应，也就是，如果释放一个对象，也会释放它所引用的对象。
+一个scene携带其下的所有层以及精灵构成的一个庞大的渲染树再析构树的root的时候会析构其下的所有元素。
+而所谓的链式反应则是经一个对象放入另一个对象的内部（作为一个内部引用），而不在别的地方进行retain(),当这个对象被free的时候其内部引用的对象也会被free.
+而我们自己临时new的一个对象如果我们以autoreleasePool来管理它（通常用create静态方法创建对象的时候），如果我们想在其他地方用到该对象我们就需要对他retain。否则他只能在当前作用域有效，因为在下一帧它就会被free,而产生野指针crash.
 
 
 
@@ -114,6 +128,7 @@ CCSet/CCSetIterator:		是对std::set的封装，底层容器std::set<object *>
 ------- map(地图往往是读取tmx文件获得的， 像ARPG游戏可能有多种类型的地图)
 	每一个map最后都被layer这个容器所容纳。 
 ------- AI
+------- Sprite(精灵) 
 
 
 
