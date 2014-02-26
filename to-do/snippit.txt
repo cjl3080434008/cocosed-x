@@ -156,7 +156,7 @@ CCSet/CCSetIterator:		是对std::set的封装，底层容器std::set<object *>
 项目文件划分：
 ------- util
 ------- scene(是图层控制的基础，直接由director调用，负责场景切换。
-		scenemgr类来控制场景的切换)
+		scenemgr类来控制场景的切换,其中有一个管理类，以及多个不同场景的类<场景类中包含图层的加载在init函数中>)！！！
 ------- layer	(精灵层<所有可动物体的基类> 、 控制层、
 		特效层<咱都特效，扣血弹tip等>、 )
 ------- model
