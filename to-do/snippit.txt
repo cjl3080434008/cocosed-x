@@ -44,6 +44,13 @@ CCSprite *hero = CCSprite::spriteWithSpriteFrame(frame1);
 hero->setPosition(ccp(100,100));
 addChild(hero);
 
+CCSpriteFrame* frame = cache->spriteFrameByName("girl1.png"); //通过CCSpriteFrameCache来获取spriteFrame. 最后集成到一个CCArray framesArray中。
+通过CCSpriteFrame来创建动画（动画本质上就是多个帧的播放）
+/* 使用图片帧生成动画对象,每隔500毫秒播放一帧*/  
+CCAnimation* animation = CCAnimation::createWithSpriteFrames(framesArray, 0.5f);  
+animation->setLoops(-1);    // 设置循环播放  
+animation->setRestoreOriginalFrame(true);   // 设置播放完毕后恢复精灵原始帧 
+
 4.CCTimer:
 update定时器 & interval定时器
 update定时器每个节点只能注册一个，带优先级
@@ -89,6 +96,25 @@ _gameBatchNode = CCSpriteBatchNode::create("sprite_sheet.png");
 this->addChild(_gameBatchNode);
 sprite = CCSprite::createWithSpriteFrameName("trees.png"); //	这里的.png都在plist里面定义好了。
 
+10.触摸设置
+schedule(schedule_selector(HRocker::updatePos));//添加刷新函数
+CCDirector::sharedDirector()->getTouchDispatcher()->addTargetedDelegate(this, 0,false);//添加触摸委托
+且需要this->setTouchable(true);
+!! 记得在禁用的时候删除触摸委托removeTargetedDelegate(this);
+
+11.CCSpriteBatchNode，减少glDrawArray的次数（批次渲染）
+我们已经逹到了节省内存和减少纹理切换, 最後一个我们想做的优化是减少 glDrawArray 的次数, 而我们所运用的技巧, 就是批次渲染(Batch Rendering), cocos2d 提供了CCSpriteBatchNode 来方便大家做有关的处理, CCSpriteBatchNode 里的CCSprite 都是要用同一个纹理的, 所以我们在建立一个 CCSpriteBatchNode 是要给它一个纹理, 再把它加到 Layer 里”。
+通过CCTexture2D来创建一个CCSpriteBatchNode对象，并将它加入到layer中，其他以此CCSpriteBatchNode作为贴图的精灵直接加入到CCSpriteBatchNode对象中，注意就可以方便的完成批量渲染了。
+
+
+12.cocos2d-x中的userObject.它是CCNode的一个特别的地方，CCNode允许我们绑定一个CCObject类型或其子类型的对象到其身上，只要这个CCNode没有被释放，我们就可以随时取出绑定的userObject对象.
+相当于在CCNode下有一个CCObject *userObject变量。可以利用它来做一些事情。
+
+
+13.用户数据的本地化保存处理：通过cocos2d-x提供的CCUserDefault来将需要的数据生成XML文件。
+CCUserDefault::sharedUserDefault()->setStringForKey(key, value);
+最后记得CCUserDefault::sharedUserDefault()->flush();
+
 
 ======================================
 ======================================
@@ -97,7 +123,7 @@ sprite = CCSprite::createWithSpriteFrameName("trees.png"); //	这里的.png都�
 基本类型：
 			object ---->用成员函数指针来完成方法传递与调用。
 			   |
-			  Node  ----->node用vector保存child并有一个parent指针。
+			  Node（update方法）  ----->node用vector保存child并有一个parent指针。
 
 CCSet/CCSetIterator:		是对std::set的封装，底层容器std::set<object *>
 
@@ -109,9 +135,17 @@ CCSet/CCSetIterator:		是对std::set的封装，底层容器std::set<object *>
 一个scene携带其下的所有层以及精灵构成的一个庞大的渲染树再析构树的root的时候会析构其下的所有元素。
 而所谓的链式反应则是经一个对象放入另一个对象的内部（作为一个内部引用），而不在别的地方进行retain(),当这个对象被free的时候其内部引用的对象也会被free.
 而我们自己临时new的一个对象如果我们以autoreleasePool来管理它（通常用create静态方法创建对象的时候），如果我们想在其他地方用到该对象我们就需要对他retain。否则他只能在当前作用域有效，因为在下一帧它就会被free,而产生野指针crash.
+注意：必须要调用了对象的autoRelease函数之后，retain和release函数才会生效
+
+
+<每一帧都想更新操作？>
+必须继承CCNode因为它自带的update方法当调用scheduleUpdate时，就会在每一帧都调用其update方法来完成更新操作。
+《注意：》必须要先将对象加入到场景(layer or scene)中才行。
 
 
 
+<粒子系统>  ---- > 1.粒子 2.粒子发射器
+在进行粒子系统的创建时，首先把粒子发射器放到某个位置，然后设定要生成的粒子的数量及粒子的起始属性（往往设定生命值为随机），然后在开始创建出粒子并不断的更新粒子，粒子在更新运动状态的同时生命值会被不断的消耗直至死亡。死亡后的粒子被发射器记录回收，为了保证同一时间内有固定数量的粒子在存活中，发射器会在合适的时间重新初始化并运行回收的粒子。
 
 
 
@@ -121,7 +155,8 @@ CCSet/CCSetIterator:		是对std::set的封装，底层容器std::set<object *>
 ======================================
 项目文件划分：
 ------- util
-------- scene(是图层控制的基础，直接由director调用，负责场景切换。)
+------- scene(是图层控制的基础，直接由director调用，负责场景切换。
+		scenemgr类来控制场景的切换)
 ------- layer	(精灵层<所有可动物体的基类> 、 控制层、
 		特效层<咱都特效，扣血弹tip等>、 )
 ------- model
@@ -196,5 +231,26 @@ for( it = objects->begin(); it != objects->end(); it++)
 }
 
 
+// 根据plist中的帧自动创建动画的工具函数：
+cocos2d::CCAnimation* SpriteHelper::createAnimWithSingleFrameN( const char* name, int count, float delay )  
+{  
+    CCSpriteFrameCache* cache = CCSpriteFrameCache::sharedSpriteFrameCache();  
+  
+    CCArray* framesArray = CCArray::createWithCapacity(count);  
+  
+    char str[80];  
+    for(int i = 1; i <= count; i++)  
+    {  
+        sprintf(str, "%s%d.png", name, i);  
+        framesArray->addObject(cache->spriteFrameByName(str));  
+    }  
+  
+    CCAnimation* animation = CCAnimation::createWithSpriteFrames(framesArray);  
+    animation->setLoops(-1);		// 循环设置 -1 为无限循环
+    animation->setRestoreOriginalFrame(true);  
+    animation->setDelayPerUnit(delay);  
+  
+    return animation;  
+} 
 
 

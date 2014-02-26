@@ -5,14 +5,17 @@
 7. 多点触控（done）
 9. 坐标转换(done)
 10. 声音控制(done)
-11. 回调控制
-12. 精灵贴图
-13. 动画
-5.1 场景地图的相对移动
+4. 场景间的切换(done)
+2. 菜单的操作(done)
+3. 加载活动物体（包括玩家）(done)
+11. 回调控制 (done callFunc(scheduler(func)))
+12. 精灵贴图(done)
+5.1
+场景地图的相对移动(这个是基于地图大小与Director().getWinSize()的大小做比较进行的移动，也就是地图一开始加载进去就很大了)
 6. 场景间交换数据
-2. 菜单的操作
-3. 加载活动物体（包括玩家）
-4. 场景间的切换
+13. 动画
+14. 如何做到像跑酷那样地图可以无限延伸（实现的方法是两张一样的图片交叉出现）
+15. 用户数据本地化（XML、json等方式保存）
 
 
 // *********
@@ -41,6 +44,7 @@ if (ballNextPosition.x > _screenSize.width - _ball->radius()) {
 
 7.多点触控： 
 （1）touchBegin的时候便利所有的touch点，然后遍历所有的精灵 check
+CCPoint tap = touch->getLocationInView();
 if(sprite->boundingBox().containsPoint(tap))
 	sprite->setTouch(touch);
 （2）touchMove的时候继续便利所有的touch点找到之前记录的那个touch点，
